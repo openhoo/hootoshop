@@ -1,8 +1,8 @@
 "use client"
 
-import { Check, RotateCcw, AlignCenter } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AlignCenter, Check, RotateCcw } from "lucide-react"
 import type { CropRegion } from "@/components/crop-tool"
+import { Button } from "@/components/ui/button"
 
 interface CropControlsProps {
   cropRegion: CropRegion
@@ -41,7 +41,7 @@ export function CropControls({
   aspectRatioValue,
 }: CropControlsProps) {
   const handleWidthCommit = (value: string) => {
-    const w = Math.max(20, Math.min(originalWidth, parseInt(value) || 20))
+    const w = Math.max(20, Math.min(originalWidth, parseInt(value, 10) || 20))
     let h: number
     if (aspectRatioValue !== null) {
       h = Math.round(w / aspectRatioValue)
@@ -50,14 +50,11 @@ export function CropControls({
     }
     h = Math.max(20, Math.min(originalHeight, h))
     const finalW = aspectRatioValue !== null ? Math.round(h * aspectRatioValue) : w
-    onManualDimensionChange(
-      Math.max(20, Math.min(originalWidth, finalW)),
-      h
-    )
+    onManualDimensionChange(Math.max(20, Math.min(originalWidth, finalW)), h)
   }
 
   const handleHeightCommit = (value: string) => {
-    const h = Math.max(20, Math.min(originalHeight, parseInt(value) || 20))
+    const h = Math.max(20, Math.min(originalHeight, parseInt(value, 10) || 20))
     let w: number
     if (aspectRatioValue !== null) {
       w = Math.round(h * aspectRatioValue)
@@ -66,10 +63,7 @@ export function CropControls({
     }
     w = Math.max(20, Math.min(originalWidth, w))
     const finalH = aspectRatioValue !== null ? Math.round(w / aspectRatioValue) : h
-    onManualDimensionChange(
-      w,
-      Math.max(20, Math.min(originalHeight, finalH))
-    )
+    onManualDimensionChange(w, Math.max(20, Math.min(originalHeight, finalH)))
   }
 
   return (
@@ -89,7 +83,10 @@ export function CropControls({
             <p className="text-sm font-mono text-foreground">{Math.round(cropRegion.y)}px</p>
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="crop-width" className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            <label
+              htmlFor="crop-width"
+              className="text-[10px] uppercase tracking-wider text-muted-foreground"
+            >
               Width
             </label>
             <input
@@ -109,7 +106,10 @@ export function CropControls({
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="crop-height" className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            <label
+              htmlFor="crop-height"
+              className="text-[10px] uppercase tracking-wider text-muted-foreground"
+            >
               Height
             </label>
             <input
@@ -139,6 +139,7 @@ export function CropControls({
         <div className="grid grid-cols-3 gap-2">
           {ASPECT_RATIOS.map((ratio) => (
             <button
+              type="button"
               key={ratio.value}
               onClick={() => onAspectRatio(ratio.value)}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all
@@ -160,6 +161,7 @@ export function CropControls({
       {/* Keep Centered Toggle */}
       <div className="glass-panel rounded-xl p-4">
         <button
+          type="button"
           onClick={() => onKeepCenteredChange(!keepCentered)}
           className={`w-full flex items-center gap-3 text-sm transition-colors ${
             keepCentered ? "text-primary" : "text-muted-foreground hover:text-foreground"

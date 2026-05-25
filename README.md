@@ -22,6 +22,7 @@ Open <http://localhost:3000> and upload an image to start editing.
 
 ```sh
 pnpm lint
+pnpm format
 pnpm typecheck
 pnpm build
 pnpm audit

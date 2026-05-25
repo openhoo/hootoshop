@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ImageUpload } from "@/components/image-upload"
 import { ImageEditor } from "@/components/image-editor"
+import { ImageUpload } from "@/components/image-upload"
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -54,10 +54,7 @@ export default function Home() {
             <ImageUpload onImageUpload={(file) => setSelectedFile(file)} />
           </div>
         ) : (
-          <ImageEditor
-            file={selectedFile}
-            onClose={() => setSelectedFile(null)}
-          />
+          <ImageEditor file={selectedFile} onClose={() => setSelectedFile(null)} />
         )}
       </div>
     </main>

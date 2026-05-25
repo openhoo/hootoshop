@@ -1,18 +1,18 @@
 "use client"
 
-import { useState, useRef } from "react"
 import {
-  RotateCw,
-  RotateCcw,
-  FlipHorizontal2,
-  FlipVertical2,
-  Sun,
+  Check,
   Contrast,
   Droplets,
+  FlipHorizontal2,
+  FlipVertical2,
   Focus,
-  Check,
   RotateCcw as ResetIcon,
+  RotateCcw,
+  RotateCw,
+  Sun,
 } from "lucide-react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 
@@ -70,13 +70,18 @@ export function AdjustTools({
     })
   }
 
+  function getCanvasContext(canvas: HTMLCanvasElement) {
+    return canvas.getContext("2d")
+  }
+
   // ---------- immediate transforms ----------
   const handleRotateCW = async () => {
     const img = await loadImg()
     const c = document.createElement("canvas")
     c.width = img.naturalHeight
     c.height = img.naturalWidth
-    const ctx = c.getContext("2d")!
+    const ctx = getCanvasContext(c)
+    if (!ctx) return
     ctx.translate(c.width, 0)
     ctx.rotate(Math.PI / 2)
     ctx.drawImage(img, 0, 0)
@@ -88,7 +93,8 @@ export function AdjustTools({
     const c = document.createElement("canvas")
     c.width = img.naturalHeight
     c.height = img.naturalWidth
-    const ctx = c.getContext("2d")!
+    const ctx = getCanvasContext(c)
+    if (!ctx) return
     ctx.translate(0, c.height)
     ctx.rotate(-Math.PI / 2)
     ctx.drawImage(img, 0, 0)
@@ -100,7 +106,8 @@ export function AdjustTools({
     const c = document.createElement("canvas")
     c.width = img.naturalWidth
     c.height = img.naturalHeight
-    const ctx = c.getContext("2d")!
+    const ctx = getCanvasContext(c)
+    if (!ctx) return
     ctx.translate(c.width, 0)
     ctx.scale(-1, 1)
     ctx.drawImage(img, 0, 0)
@@ -112,7 +119,8 @@ export function AdjustTools({
     const c = document.createElement("canvas")
     c.width = img.naturalWidth
     c.height = img.naturalHeight
-    const ctx = c.getContext("2d")!
+    const ctx = getCanvasContext(c)
+    if (!ctx) return
     ctx.translate(0, c.height)
     ctx.scale(1, -1)
     ctx.drawImage(img, 0, 0)
@@ -125,7 +133,8 @@ export function AdjustTools({
     const c = applyCanvasRef.current ?? document.createElement("canvas")
     c.width = originalWidth
     c.height = originalHeight
-    const ctx = c.getContext("2d")!
+    const ctx = getCanvasContext(c)
+    if (!ctx) return
 
     // Apply pixel-level adjustments manually for maximum compatibility
     ctx.drawImage(img, 0, 0, originalWidth, originalHeight)
@@ -169,7 +178,8 @@ export function AdjustTools({
       const blurCanvas = document.createElement("canvas")
       blurCanvas.width = originalWidth
       blurCanvas.height = originalHeight
-      const bCtx = blurCanvas.getContext("2d")!
+      const bCtx = getCanvasContext(blurCanvas)
+      if (!bCtx) return
       bCtx.filter = `blur(${adjustments.blur}px)`
       bCtx.drawImage(c, 0, 0)
       bCtx.filter = "none"
@@ -201,10 +211,38 @@ export function AdjustTools({
     max: number
     step: number
   }[] = [
-    { key: "brightness", label: "Brightness", icon: <Sun className="w-3.5 h-3.5" />, min: -100, max: 100, step: 1 },
-    { key: "contrast", label: "Contrast", icon: <Contrast className="w-3.5 h-3.5" />, min: -100, max: 100, step: 1 },
-    { key: "saturation", label: "Saturation", icon: <Droplets className="w-3.5 h-3.5" />, min: -100, max: 100, step: 1 },
-    { key: "blur", label: "Blur", icon: <Focus className="w-3.5 h-3.5" />, min: 0, max: 20, step: 0.5 },
+    {
+      key: "brightness",
+      label: "Brightness",
+      icon: <Sun className="w-3.5 h-3.5" />,
+      min: -100,
+      max: 100,
+      step: 1,
+    },
+    {
+      key: "contrast",
+      label: "Contrast",
+      icon: <Contrast className="w-3.5 h-3.5" />,
+      min: -100,
+      max: 100,
+      step: 1,
+    },
+    {
+      key: "saturation",
+      label: "Saturation",
+      icon: <Droplets className="w-3.5 h-3.5" />,
+      min: -100,
+      max: 100,
+      step: 1,
+    },
+    {
+      key: "blur",
+      label: "Blur",
+      icon: <Focus className="w-3.5 h-3.5" />,
+      min: 0,
+      max: 20,
+      step: 0.5,
+    },
   ]
 
   return (
@@ -221,7 +259,7 @@ export function AdjustTools({
       </div>
 
       {/* Hidden canvas for apply */}
-      <canvas ref={applyCanvasRef} className="hidden" aria-hidden="true" />
+      <canvas ref={applyCanvasRef} className="hidden" />
 
       {/* Controls sidebar */}
       <div className="w-full lg:w-72 shrink-0 space-y-4 overflow-y-auto max-h-[calc(100vh-8rem)]">
@@ -232,6 +270,7 @@ export function AdjustTools({
           </h3>
           <div className="grid grid-cols-4 gap-2">
             <button
+              type="button"
               onClick={handleRotateCCW}
               className="flex flex-col items-center gap-1.5 py-2.5 rounded-lg bg-secondary/30 text-muted-foreground
                 hover:text-foreground hover:bg-secondary/50 transition-colors"
@@ -241,6 +280,7 @@ export function AdjustTools({
               <span className="text-[10px]">-90</span>
             </button>
             <button
+              type="button"
               onClick={handleRotateCW}
               className="flex flex-col items-center gap-1.5 py-2.5 rounded-lg bg-secondary/30 text-muted-foreground
                 hover:text-foreground hover:bg-secondary/50 transition-colors"
@@ -250,6 +290,7 @@ export function AdjustTools({
               <span className="text-[10px]">+90</span>
             </button>
             <button
+              type="button"
               onClick={handleFlipH}
               className="flex flex-col items-center gap-1.5 py-2.5 rounded-lg bg-secondary/30 text-muted-foreground
                 hover:text-foreground hover:bg-secondary/50 transition-colors"
@@ -259,6 +300,7 @@ export function AdjustTools({
               <span className="text-[10px]">Flip H</span>
             </button>
             <button
+              type="button"
               onClick={handleFlipV}
               className="flex flex-col items-center gap-1.5 py-2.5 rounded-lg bg-secondary/30 text-muted-foreground
                 hover:text-foreground hover:bg-secondary/50 transition-colors"
@@ -279,11 +321,12 @@ export function AdjustTools({
           {sliders.map(({ key, label, icon, min, max, step }) => (
             <div key={key} className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                   {icon}
                   {label}
-                </label>
+                </span>
                 <button
+                  type="button"
                   className="text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors min-w-[3rem] text-right"
                   onClick={() => update(key, key === "blur" ? 0 : 0)}
                   aria-label={`Reset ${label}`}

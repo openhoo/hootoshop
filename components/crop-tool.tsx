@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, useState, useEffect } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export interface CropRegion {
   x: number
@@ -49,12 +49,19 @@ function getSnapGuides(crop: CropRegion, imgW: number, imgH: number, threshold: 
 function snapMove(crop: CropRegion, imgW: number, imgH: number, threshold: number): CropRegion {
   const result = { ...crop }
   if (Math.abs(crop.x + crop.width / 2 - imgW / 2) < threshold) result.x = imgW / 2 - crop.width / 2
-  if (Math.abs(crop.y + crop.height / 2 - imgH / 2) < threshold) result.y = imgH / 2 - crop.height / 2
+  if (Math.abs(crop.y + crop.height / 2 - imgH / 2) < threshold)
+    result.y = imgH / 2 - crop.height / 2
   return result
 }
 
 export function CropTool({
-  imageSrc, originalWidth, originalHeight, cropRegion, onCropChange, aspectRatio, keepCentered,
+  imageSrc,
+  originalWidth,
+  originalHeight,
+  cropRegion,
+  onCropChange,
+  aspectRatio,
+  keepCentered,
 }: CropToolProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -77,11 +84,21 @@ export function CropTool({
   }, [originalWidth, originalHeight])
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => { if (e.key === "Shift") setShiftHeld(true) }
-    const up = (e: KeyboardEvent) => { if (e.key === "Shift") { setShiftHeld(false); axisLockRef.current = null } }
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setShiftHeld(true)
+    }
+    const up = (e: KeyboardEvent) => {
+      if (e.key === "Shift") {
+        setShiftHeld(false)
+        axisLockRef.current = null
+      }
+    }
     window.addEventListener("keydown", down)
     window.addEventListener("keyup", up)
-    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up) }
+    return () => {
+      window.removeEventListener("keydown", down)
+      window.removeEventListener("keyup", up)
+    }
   }, [])
 
   // Arrow key movement for crop
@@ -95,7 +112,8 @@ export function CropTool({
 
       e.preventDefault()
       const step = e.shiftKey ? ARROW_STEP_SHIFT : ARROW_STEP
-      let dx = 0, dy = 0
+      let dx = 0,
+        dy = 0
       if (e.key === "ArrowUp") dy = -step
       if (e.key === "ArrowDown") dy = step
       if (e.key === "ArrowLeft") dx = -step
@@ -104,10 +122,18 @@ export function CropTool({
       onCropChange(
         snapMove(
           clampCrop(
-            { x: cropRegion.x + dx, y: cropRegion.y + dy, width: cropRegion.width, height: cropRegion.height },
-            originalWidth, originalHeight
+            {
+              x: cropRegion.x + dx,
+              y: cropRegion.y + dy,
+              width: cropRegion.width,
+              height: cropRegion.height,
+            },
+            originalWidth,
+            originalHeight
           ),
-          originalWidth, originalHeight, SNAP_THRESHOLD
+          originalWidth,
+          originalHeight,
+          SNAP_THRESHOLD
         )
       )
     }
@@ -151,53 +177,104 @@ export function CropTool({
             axisLockRef.current = Math.abs(dx) >= Math.abs(dy) ? "x" : "y"
           if (axisLockRef.current === "x") dy = 0
           if (axisLockRef.current === "y") dx = 0
-        } else { axisLockRef.current = null }
+        } else {
+          axisLockRef.current = null
+        }
         newCrop.x = Math.max(0, Math.min(startCrop.x + dx, originalWidth - startCrop.width))
         newCrop.y = Math.max(0, Math.min(startCrop.y + dy, originalHeight - startCrop.height))
         newCrop = snapMove(newCrop, originalWidth, originalHeight, SNAP_THRESHOLD)
       } else {
-        const dL = dragType?.includes("w"), dR = dragType?.includes("e")
-        const dT = dragType?.includes("n"), dB = dragType?.includes("s")
+        const dL = dragType?.includes("w"),
+          dR = dragType?.includes("e")
+        const dT = dragType?.includes("n"),
+          dB = dragType?.includes("s")
 
         if (aspectRatio !== null) {
-          let nW = startCrop.width, nH = startCrop.height
-          if (dL || dR) { nW = Math.max(minSize, startCrop.width + (dL ? -dx : dx)); nH = nW / aspectRatio }
-          if (dT || dB) {
-            if (!dL && !dR) { nH = Math.max(minSize, startCrop.height + (dT ? -dy : dy)); nW = nH * aspectRatio }
-            else if (Math.abs(dy) > Math.abs(dx)) { nH = Math.max(minSize, startCrop.height + (dT ? -dy : dy)); nW = nH * aspectRatio }
+          let nW = startCrop.width,
+            nH = startCrop.height
+          if (dL || dR) {
+            nW = Math.max(minSize, startCrop.width + (dL ? -dx : dx))
+            nH = nW / aspectRatio
           }
-          if (nW > originalWidth) { nW = originalWidth; nH = nW / aspectRatio }
-          if (nH > originalHeight) { nH = originalHeight; nW = nH * aspectRatio }
-          nW = Math.max(minSize, nW); nH = Math.max(minSize, nH)
-          if (keepCentered) { newCrop = centerCrop(nW, nH, originalWidth, originalHeight) }
-          else {
+          if (dT || dB) {
+            if (!dL && !dR) {
+              nH = Math.max(minSize, startCrop.height + (dT ? -dy : dy))
+              nW = nH * aspectRatio
+            } else if (Math.abs(dy) > Math.abs(dx)) {
+              nH = Math.max(minSize, startCrop.height + (dT ? -dy : dy))
+              nW = nH * aspectRatio
+            }
+          }
+          if (nW > originalWidth) {
+            nW = originalWidth
+            nH = nW / aspectRatio
+          }
+          if (nH > originalHeight) {
+            nH = originalHeight
+            nW = nH * aspectRatio
+          }
+          nW = Math.max(minSize, nW)
+          nH = Math.max(minSize, nH)
+          if (keepCentered) {
+            newCrop = centerCrop(nW, nH, originalWidth, originalHeight)
+          } else {
             if (dL) newCrop.x = startCrop.x + startCrop.width - nW
             else if (!dR) newCrop.x = startCrop.x + (startCrop.width - nW) / 2
             if (dT) newCrop.y = startCrop.y + startCrop.height - nH
             else if (!dB) newCrop.y = startCrop.y + (startCrop.height - nH) / 2
-            newCrop.width = nW; newCrop.height = nH
+            newCrop.width = nW
+            newCrop.height = nH
           }
         } else {
           if (shiftHeld && (dL || dR) && (dT || dB)) {
-            const size = Math.abs(dx) >= Math.abs(dy)
-              ? Math.max(minSize, startCrop.width + (dL ? -dx : dx))
-              : Math.max(minSize, startCrop.height + (dT ? -dy : dy))
+            const size =
+              Math.abs(dx) >= Math.abs(dy)
+                ? Math.max(minSize, startCrop.width + (dL ? -dx : dx))
+                : Math.max(minSize, startCrop.height + (dT ? -dy : dy))
             if (dL) newCrop.x = startCrop.x + startCrop.width - size
             if (dT) newCrop.y = startCrop.y + startCrop.height - size
-            newCrop.width = size; newCrop.height = size
+            newCrop.width = size
+            newCrop.height = size
           } else {
-            if (dL) { const nX = Math.max(0, Math.min(startCrop.x + dx, startCrop.x + startCrop.width - minSize)); newCrop.width = startCrop.width - (nX - startCrop.x); newCrop.x = nX }
-            if (dR) newCrop.width = Math.max(minSize, Math.min(startCrop.width + dx, originalWidth - startCrop.x))
-            if (dT) { const nY = Math.max(0, Math.min(startCrop.y + dy, startCrop.y + startCrop.height - minSize)); newCrop.height = startCrop.height - (nY - startCrop.y); newCrop.y = nY }
-            if (dB) newCrop.height = Math.max(minSize, Math.min(startCrop.height + dy, originalHeight - startCrop.y))
+            if (dL) {
+              const nX = Math.max(
+                0,
+                Math.min(startCrop.x + dx, startCrop.x + startCrop.width - minSize)
+              )
+              newCrop.width = startCrop.width - (nX - startCrop.x)
+              newCrop.x = nX
+            }
+            if (dR)
+              newCrop.width = Math.max(
+                minSize,
+                Math.min(startCrop.width + dx, originalWidth - startCrop.x)
+              )
+            if (dT) {
+              const nY = Math.max(
+                0,
+                Math.min(startCrop.y + dy, startCrop.y + startCrop.height - minSize)
+              )
+              newCrop.height = startCrop.height - (nY - startCrop.y)
+              newCrop.y = nY
+            }
+            if (dB)
+              newCrop.height = Math.max(
+                minSize,
+                Math.min(startCrop.height + dy, originalHeight - startCrop.y)
+              )
           }
-          if (keepCentered) newCrop = centerCrop(newCrop.width, newCrop.height, originalWidth, originalHeight)
+          if (keepCentered)
+            newCrop = centerCrop(newCrop.width, newCrop.height, originalWidth, originalHeight)
         }
       }
       onCropChange(clampCrop(newCrop, originalWidth, originalHeight))
     }
 
-    const handleUp = () => { setIsDragging(false); setDragType(null); axisLockRef.current = null }
+    const handleUp = () => {
+      setIsDragging(false)
+      setDragType(null)
+      axisLockRef.current = null
+    }
     window.addEventListener("mousemove", handleMove)
     window.addEventListener("mouseup", handleUp)
     window.addEventListener("touchmove", handleMove, { passive: false })
@@ -208,9 +285,26 @@ export function CropTool({
       window.removeEventListener("touchmove", handleMove)
       window.removeEventListener("touchend", handleUp)
     }
-  }, [isDragging, dragType, dragStart, startCrop, originalWidth, originalHeight, toOriginal, onCropChange, aspectRatio, keepCentered, shiftHeld])
+  }, [
+    isDragging,
+    dragType,
+    dragStart,
+    startCrop,
+    originalWidth,
+    originalHeight,
+    toOriginal,
+    onCropChange,
+    aspectRatio,
+    keepCentered,
+    shiftHeld,
+  ])
 
-  const dc = { x: toDisplay(cropRegion.x), y: toDisplay(cropRegion.y), w: toDisplay(cropRegion.width), h: toDisplay(cropRegion.height) }
+  const dc = {
+    x: toDisplay(cropRegion.x),
+    y: toDisplay(cropRegion.y),
+    w: toDisplay(cropRegion.width),
+    h: toDisplay(cropRegion.height),
+  }
   const imgW = toDisplay(originalWidth)
   const imgH = toDisplay(originalHeight)
   const rawGuides = getSnapGuides(cropRegion, originalWidth, originalHeight, SNAP_THRESHOLD)
@@ -223,10 +317,26 @@ export function CropTool({
     { pos: "ne", style: { top: -hs / 2, right: -hs / 2 }, cursor: "nesw-resize" },
     { pos: "sw", style: { bottom: -hs / 2, left: -hs / 2 }, cursor: "nesw-resize" },
     { pos: "se", style: { bottom: -hs / 2, right: -hs / 2 }, cursor: "nwse-resize" },
-    { pos: "n", style: { top: -hs / 2, left: "50%", transform: "translateX(-50%)" }, cursor: "ns-resize" },
-    { pos: "s", style: { bottom: -hs / 2, left: "50%", transform: "translateX(-50%)" }, cursor: "ns-resize" },
-    { pos: "w", style: { top: "50%", left: -hs / 2, transform: "translateY(-50%)" }, cursor: "ew-resize" },
-    { pos: "e", style: { top: "50%", right: -hs / 2, transform: "translateY(-50%)" }, cursor: "ew-resize" },
+    {
+      pos: "n",
+      style: { top: -hs / 2, left: "50%", transform: "translateX(-50%)" },
+      cursor: "ns-resize",
+    },
+    {
+      pos: "s",
+      style: { bottom: -hs / 2, left: "50%", transform: "translateX(-50%)" },
+      cursor: "ns-resize",
+    },
+    {
+      pos: "w",
+      style: { top: "50%", left: -hs / 2, transform: "translateY(-50%)" },
+      cursor: "ew-resize",
+    },
+    {
+      pos: "e",
+      style: { top: "50%", right: -hs / 2, transform: "translateY(-50%)" },
+      cursor: "ew-resize",
+    },
   ]
 
   return (
@@ -234,40 +344,93 @@ export function CropTool({
       <div
         ref={containerRef}
         className="relative select-none"
-        style={{ width: originalWidth * displayScale || "100%", height: originalHeight * displayScale || "auto", maxWidth: "100%", maxHeight: "100%" }}
+        style={{
+          width: originalWidth * displayScale || "100%",
+          height: originalHeight * displayScale || "auto",
+          maxWidth: "100%",
+          maxHeight: "100%",
+        }}
       >
         {/* Base image dimmed */}
-        <img src={imageSrc} alt="Image being cropped" className="w-full h-full object-contain opacity-30" draggable={false} />
+        <img
+          src={imageSrc}
+          alt="Crop source"
+          className="w-full h-full object-contain opacity-30"
+          draggable={false}
+        />
         <div className="absolute inset-0 bg-background/40 pointer-events-none" />
 
         {/* Snap guide: vertical center line */}
         {guides.vertical && (
-          <div className="absolute pointer-events-none z-20" style={{ left: imgW / 2, top: 0, width: 0, height: imgH, borderLeft: "1px dashed oklch(0.65 0.18 250 / 0.7)" }} />
+          <div
+            className="absolute pointer-events-none z-20"
+            style={{
+              left: imgW / 2,
+              top: 0,
+              width: 0,
+              height: imgH,
+              borderLeft: "1px dashed oklch(0.65 0.18 250 / 0.7)",
+            }}
+          />
         )}
         {/* Snap guide: horizontal center line */}
         {guides.horizontal && (
-          <div className="absolute pointer-events-none z-20" style={{ top: imgH / 2, left: 0, height: 0, width: imgW, borderTop: "1px dashed oklch(0.65 0.18 250 / 0.7)" }} />
+          <div
+            className="absolute pointer-events-none z-20"
+            style={{
+              top: imgH / 2,
+              left: 0,
+              height: 0,
+              width: imgW,
+              borderTop: "1px dashed oklch(0.65 0.18 250 / 0.7)",
+            }}
+          />
         )}
         {/* Center diamond when both guides active */}
         {guides.vertical && guides.horizontal && (
-          <div className="absolute pointer-events-none z-20" style={{ left: imgW / 2 - 4, top: imgH / 2 - 4, width: 8, height: 8, borderRadius: 1, transform: "rotate(45deg)", background: "oklch(0.65 0.18 250 / 0.9)" }} />
+          <div
+            className="absolute pointer-events-none z-20"
+            style={{
+              left: imgW / 2 - 4,
+              top: imgH / 2 - 4,
+              width: 8,
+              height: 8,
+              borderRadius: 1,
+              transform: "rotate(45deg)",
+              background: "oklch(0.65 0.18 250 / 0.9)",
+            }}
+          />
         )}
 
         {/* Bright crop region */}
-        <div className="absolute overflow-hidden" style={{ left: dc.x, top: dc.y, width: dc.w, height: dc.h }}>
-          <img src={imageSrc} alt="" draggable={false} className="max-w-none" style={{ width: originalWidth * displayScale, height: originalHeight * displayScale, marginLeft: -dc.x, marginTop: -dc.y }} />
+        <div
+          className="absolute overflow-hidden"
+          style={{ left: dc.x, top: dc.y, width: dc.w, height: dc.h }}
+        >
+          <img
+            src={imageSrc}
+            alt=""
+            draggable={false}
+            className="max-w-none"
+            style={{
+              width: originalWidth * displayScale,
+              height: originalHeight * displayScale,
+              marginLeft: -dc.x,
+              marginTop: -dc.y,
+            }}
+          />
         </div>
 
         {/* Crop border + handles */}
-        <div
-          role="group"
-          aria-label="Crop region. Use arrow keys to move, Shift+arrows for 10px steps."
-          tabIndex={0}
+        <fieldset
           onMouseDown={(e) => handleMouseDown(e, "move")}
           onTouchStart={(e) => handleMouseDown(e, "move")}
           className={`absolute border-2 border-foreground/80 ${keepCentered ? "cursor-default" : "cursor-move"} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
           style={{ left: dc.x, top: dc.y, width: dc.w, height: dc.h }}
         >
+          <legend className="sr-only">
+            Crop region. Use arrow keys to move, Shift+arrows for 10px steps.
+          </legend>
           {/* Rule of thirds */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute left-1/3 top-0 bottom-0 w-px bg-foreground/20" />
@@ -276,20 +439,37 @@ export function CropTool({
             <div className="absolute top-2/3 left-0 right-0 h-px bg-foreground/20" />
           </div>
           {/* Center crosshair inside crop when snapped */}
-          {guides.vertical && <div className="absolute top-0 bottom-0 w-px pointer-events-none" style={{ left: "50%", background: "oklch(0.65 0.18 250 / 0.5)" }} />}
-          {guides.horizontal && <div className="absolute left-0 right-0 h-px pointer-events-none" style={{ top: "50%", background: "oklch(0.65 0.18 250 / 0.5)" }} />}
+          {guides.vertical && (
+            <div
+              className="absolute top-0 bottom-0 w-px pointer-events-none"
+              style={{ left: "50%", background: "oklch(0.65 0.18 250 / 0.5)" }}
+            />
+          )}
+          {guides.horizontal && (
+            <div
+              className="absolute left-0 right-0 h-px pointer-events-none"
+              style={{ top: "50%", background: "oklch(0.65 0.18 250 / 0.5)" }}
+            />
+          )}
 
           {handles.map(({ pos, style, cursor }) => (
-            <div key={pos} aria-label={`Resize handle ${pos}`}
-              onMouseDown={(e) => handleMouseDown(e, pos)} onTouchStart={(e) => handleMouseDown(e, pos)}
+            <button
+              type="button"
+              key={pos}
+              aria-label={`Resize handle ${pos}`}
+              onMouseDown={(e) => handleMouseDown(e, pos)}
+              onTouchStart={(e) => handleMouseDown(e, pos)}
               className="absolute w-2.5 h-2.5 bg-foreground rounded-sm shadow-lg z-10 hover:bg-primary transition-colors"
               style={{ ...style, cursor }}
             />
           ))}
-        </div>
+        </fieldset>
 
         {/* Dimension label */}
-        <div className="absolute glass-panel rounded-md px-2 py-1 text-xs font-mono text-foreground pointer-events-none z-30" style={{ left: dc.x + dc.w / 2, top: dc.y + dc.h + 8, transform: "translateX(-50%)" }}>
+        <div
+          className="absolute glass-panel rounded-md px-2 py-1 text-xs font-mono text-foreground pointer-events-none z-30"
+          style={{ left: dc.x + dc.w / 2, top: dc.y + dc.h + 8, transform: "translateX(-50%)" }}
+        >
           {Math.round(cropRegion.width)} x {Math.round(cropRegion.height)}
         </div>
 

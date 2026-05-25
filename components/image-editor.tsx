@@ -1,15 +1,15 @@
 "use client"
 
-import { useState, useCallback, useRef, useEffect } from "react"
 import { Crop, Scaling, Sliders } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { EditorHeader } from "@/components/editor-header"
-import { CropTool, type CropRegion } from "@/components/crop-tool"
-import { CropControls } from "@/components/crop-controls"
-import { ResizeTool } from "@/components/resize-tool"
 import { AdjustTools } from "@/components/adjust-tools"
+import { CropControls } from "@/components/crop-controls"
+import { type CropRegion, CropTool } from "@/components/crop-tool"
+import { EditorHeader } from "@/components/editor-header"
 import type { ExportOptions } from "@/components/export-menu"
+import { ResizeTool } from "@/components/resize-tool"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface ImageEditorProps {
   file: File
@@ -30,12 +30,18 @@ interface EditorSnapshot {
 
 function parseAspectRatio(ratio: string): number | null {
   switch (ratio) {
-    case "1:1": return 1
-    case "4:3": return 4 / 3
-    case "16:9": return 16 / 9
-    case "3:2": return 3 / 2
-    case "9:16": return 9 / 16
-    default: return null
+    case "1:1":
+      return 1
+    case "4:3":
+      return 4 / 3
+    case "16:9":
+      return 16 / 9
+    case "3:2":
+      return 3 / 2
+    case "9:16":
+      return 9 / 16
+    default:
+      return null
   }
 }
 
@@ -56,7 +62,10 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
 
   // Crop state
   const [cropRegion, setCropRegion] = useState<CropRegion>({
-    x: 0, y: 0, width: 0, height: 0,
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
   })
   const [selectedAspect, setSelectedAspect] = useState("free")
   const [keepCentered, setKeepCentered] = useState(false)
@@ -185,7 +194,9 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
       img.src = dataUrl
     }
     load()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [file])
 
   const aspectRatioValue = parseAspectRatio(selectedAspect)
@@ -297,14 +308,7 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
 
     const img = new window.Image()
     img.onload = () => {
-      ctx.drawImage(
-        img,
-        Math.round(cropRegion.x),
-        Math.round(cropRegion.y),
-        w, h,
-        0, 0,
-        w, h
-      )
+      ctx.drawImage(img, Math.round(cropRegion.x), Math.round(cropRegion.y), w, h, 0, 0, w, h)
       const newSrc = canvas.toDataURL("image/png")
       setImageSrc(newSrc)
       setOriginalWidth(w)
@@ -383,30 +387,33 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
   }, [imageSrc, resizeWidth, resizeHeight, pushHistory])
 
   // Apply a transform from adjust tools (rotate, flip, brightness etc.)
-  const handleApplyTransform = useCallback((newDataUrl: string, newW: number, newH: number) => {
-    setImageSrc(newDataUrl)
-    setOriginalWidth(newW)
-    setOriginalHeight(newH)
-    setCropRegion({ x: 0, y: 0, width: newW, height: newH })
-    setResizeWidth(newW)
-    setResizeHeight(newH)
-    setSelectedAspect("free")
-    setKeepCentered(false)
-    setHasChanges(true)
+  const handleApplyTransform = useCallback(
+    (newDataUrl: string, newW: number, newH: number) => {
+      setImageSrc(newDataUrl)
+      setOriginalWidth(newW)
+      setOriginalHeight(newH)
+      setCropRegion({ x: 0, y: 0, width: newW, height: newH })
+      setResizeWidth(newW)
+      setResizeHeight(newH)
+      setSelectedAspect("free")
+      setKeepCentered(false)
+      setHasChanges(true)
 
-    pushHistory({
-      imageSrc: newDataUrl,
-      originalWidth: newW,
-      originalHeight: newH,
-      cropRegion: { x: 0, y: 0, width: newW, height: newH },
-      resizeWidth: newW,
-      resizeHeight: newH,
-      selectedAspect: "free",
-      keepCentered: false,
-    })
+      pushHistory({
+        imageSrc: newDataUrl,
+        originalWidth: newW,
+        originalHeight: newH,
+        cropRegion: { x: 0, y: 0, width: newW, height: newH },
+        resizeWidth: newW,
+        resizeHeight: newH,
+        selectedAspect: "free",
+        keepCentered: false,
+      })
 
-    toast.success("Transform applied")
-  }, [pushHistory])
+      toast.success("Transform applied")
+    },
+    [pushHistory]
+  )
 
   const handleReset = useCallback(() => {
     let cancelled = false
@@ -447,7 +454,9 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
       img.src = dataUrl
     }
     load()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [file])
 
   // Trigger a file download from a blob URL (preferred) or data URL
@@ -460,7 +469,9 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
     document.body.appendChild(a)
     setTimeout(() => {
       a.click()
-      setTimeout(() => { document.body.removeChild(a) }, 500)
+      setTimeout(() => {
+        document.body.removeChild(a)
+      }, 500)
     }, 0)
   }, [])
 
@@ -472,7 +483,10 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
       canvas.width = resizeWidth
       canvas.height = resizeHeight
       const ctx = canvas.getContext("2d")
-      if (!ctx) { resolve(null); return }
+      if (!ctx) {
+        resolve(null)
+        return
+      }
       const img = new window.Image()
       img.crossOrigin = "anonymous"
       img.onload = () => {
@@ -490,7 +504,10 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
   const handleExportWithOptions = useCallback(
     async (opts: ExportOptions) => {
       const canvas = await renderToCanvas()
-      if (!canvas) { toast.error("Failed to render image for export"); return }
+      if (!canvas) {
+        toast.error("Failed to render image for export")
+        return
+      }
 
       lastExportRef.current = opts
       const mime = `image/${opts.format}`
@@ -535,7 +552,7 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
           canvas.toBlob(
             (b) => resolve(b ? b.size : null),
             mime,
-            opts.format === "png" ? undefined : opts.quality,
+            opts.format === "png" ? undefined : opts.quality
           )
         } catch {
           resolve(null)
@@ -585,11 +602,7 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
         canRedo={canRedo}
       />
 
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="flex-1 flex flex-col min-h-0"
-      >
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
         {/* Tab bar */}
         <div className="px-4 pt-3">
           <TabsList className="bg-secondary/30 border border-glass-border">
@@ -668,7 +681,6 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
           />
         </TabsContent>
       </Tabs>
-
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react"
-import { Lock, Unlock, Maximize2, Check, Target } from "lucide-react"
+import { Check, Lock, Maximize2, Target, Unlock } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 
@@ -35,7 +35,7 @@ function estimateFileSize(
   origW: number,
   origH: number,
   newW: number,
-  newH: number,
+  newH: number
 ): number {
   // Rough pixel-area ratio estimation
   const origPixels = origW * origH
@@ -93,45 +93,41 @@ export function ResizeTool({
     originalWidth,
     originalHeight,
     resizeWidth,
-    resizeHeight,
+    resizeHeight
   )
 
-  const sizeRatio =
-    sourceBytes > 0 ? ((estimatedBytes / sourceBytes) * 100).toFixed(0) : "---"
+  const sizeRatio = sourceBytes > 0 ? ((estimatedBytes / sourceBytes) * 100).toFixed(0) : "---"
 
   const handleWidthChange = useCallback(
     (value: string) => {
-      const w = Math.max(1, Math.min(10000, parseInt(value) || 0))
+      const w = Math.max(1, Math.min(10000, parseInt(value, 10) || 0))
       if (lockAspect) {
         onResize(w, Math.round(w / aspectRatio))
       } else {
         onResize(w, resizeHeight)
       }
     },
-    [lockAspect, aspectRatio, resizeHeight, onResize],
+    [lockAspect, aspectRatio, resizeHeight, onResize]
   )
 
   const handleHeightChange = useCallback(
     (value: string) => {
-      const h = Math.max(1, Math.min(10000, parseInt(value) || 0))
+      const h = Math.max(1, Math.min(10000, parseInt(value, 10) || 0))
       if (lockAspect) {
         onResize(Math.round(h * aspectRatio), h)
       } else {
         onResize(resizeWidth, h)
       }
     },
-    [lockAspect, aspectRatio, resizeWidth, onResize],
+    [lockAspect, aspectRatio, resizeWidth, onResize]
   )
 
   const handleScaleChange = useCallback(
     (values: number[]) => {
       const scale = values[0] / 100
-      onResize(
-        Math.round(originalWidth * scale),
-        Math.round(originalHeight * scale),
-      )
+      onResize(Math.round(originalWidth * scale), Math.round(originalHeight * scale))
     },
-    [originalWidth, originalHeight, onResize],
+    [originalWidth, originalHeight, onResize]
   )
 
   const handlePreset = (w: number, h: number) => {
@@ -184,10 +180,7 @@ export function ResizeTool({
 
           <div className="flex items-end gap-2">
             <div className="flex-1 space-y-1.5">
-              <label
-                htmlFor="resize-width"
-                className="text-xs text-muted-foreground"
-              >
+              <label htmlFor="resize-width" className="text-xs text-muted-foreground">
                 Width
               </label>
               <input
@@ -209,22 +202,13 @@ export function ResizeTool({
               size="icon"
               onClick={() => setLockAspect(!lockAspect)}
               className="mb-0.5 text-muted-foreground hover:text-foreground h-9 w-9"
-              aria-label={
-                lockAspect ? "Unlock aspect ratio" : "Lock aspect ratio"
-              }
+              aria-label={lockAspect ? "Unlock aspect ratio" : "Lock aspect ratio"}
             >
-              {lockAspect ? (
-                <Lock className="w-3.5 h-3.5" />
-              ) : (
-                <Unlock className="w-3.5 h-3.5" />
-              )}
+              {lockAspect ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
             </Button>
 
             <div className="flex-1 space-y-1.5">
-              <label
-                htmlFor="resize-height"
-                className="text-xs text-muted-foreground"
-              >
+              <label htmlFor="resize-height" className="text-xs text-muted-foreground">
                 Height
               </label>
               <input
@@ -245,10 +229,8 @@ export function ResizeTool({
           {/* Scale Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs text-muted-foreground">Scale</label>
-              <span className="text-xs font-mono text-foreground">
-                {scalePercent}%
-              </span>
+              <span className="text-xs text-muted-foreground">Scale</span>
+              <span className="text-xs font-mono text-foreground">{scalePercent}%</span>
             </div>
             <Slider
               value={[scalePercent]}
@@ -271,17 +253,13 @@ export function ResizeTool({
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 Current
               </span>
-              <p className="text-sm font-mono text-foreground">
-                {formatBytes(sourceBytes)}
-              </p>
+              <p className="text-sm font-mono text-foreground">{formatBytes(sourceBytes)}</p>
             </div>
             <div className="space-y-1">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 Estimated
               </span>
-              <p className="text-sm font-mono text-foreground">
-                ~{formatBytes(estimatedBytes)}
-              </p>
+              <p className="text-sm font-mono text-foreground">~{formatBytes(estimatedBytes)}</p>
             </div>
           </div>
           {/* Size change indicator */}
@@ -316,11 +294,10 @@ export function ResizeTool({
           {/* Target file size */}
           <div className="pt-1">
             <button
+              type="button"
               onClick={() => setTargetMode(!targetMode)}
               className={`w-full flex items-center gap-2.5 text-xs transition-colors ${
-                targetMode
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                targetMode ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
               aria-pressed={targetMode}
             >
@@ -399,6 +376,7 @@ export function ResizeTool({
                 (preset.w === resizeWidth && preset.h === resizeHeight)
               return (
                 <button
+                  type="button"
                   key={preset.label}
                   onClick={() => handlePreset(preset.w, preset.h)}
                   className={`px-3 py-2 rounded-lg text-xs font-medium transition-all
@@ -422,9 +400,7 @@ export function ResizeTool({
         <Button
           size="sm"
           onClick={onApplyResize}
-          disabled={
-            resizeWidth === originalWidth && resizeHeight === originalHeight
-          }
+          disabled={resizeWidth === originalWidth && resizeHeight === originalHeight}
           className="w-full gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
           aria-label="Apply rescale to image"
         >
@@ -432,7 +408,6 @@ export function ResizeTool({
           Apply Rescale
         </Button>
       </div>
-
     </div>
   )
 }

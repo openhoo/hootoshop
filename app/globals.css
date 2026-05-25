@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,14 +13,14 @@
   --primary: oklch(0.68 0.18 250);
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.24 0.012 260 / 0.88);
-  --secondary-foreground: oklch(0.90 0 0);
-  --muted: oklch(0.22 0.008 260 / 0.80);
+  --secondary-foreground: oklch(0.9 0 0);
+  --muted: oklch(0.22 0.008 260 / 0.8);
   --muted-foreground: oklch(0.72 0.012 260);
   --accent: oklch(0.58 0.2 280);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.45 0.02 260 / 0.60);
+  --border: oklch(0.45 0.02 260 / 0.6);
   --input: oklch(0.24 0.012 260 / 0.85);
   --ring: oklch(0.68 0.18 250);
   --chart-1: oklch(0.68 0.18 250);
@@ -33,20 +33,20 @@
   --sidebar-foreground: oklch(0.96 0 0);
   --sidebar-primary: oklch(0.68 0.18 250);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.24 0.012 260 / 0.80);
+  --sidebar-accent: oklch(0.24 0.012 260 / 0.8);
   --sidebar-accent-foreground: oklch(0.96 0 0);
-  --sidebar-border: oklch(0.45 0.02 260 / 0.50);
+  --sidebar-border: oklch(0.45 0.02 260 / 0.5);
   --sidebar-ring: oklch(0.68 0.18 250);
 
-  --glass: oklch(0.18 0.010 260 / 0.82);
-  --glass-border: oklch(0.50 0.02 260 / 0.55);
-  --glass-highlight: oklch(0.98 0 0 / 0.10);
-  --surface: oklch(0.16 0.010 260 / 0.92);
+  --glass: oklch(0.18 0.01 260 / 0.82);
+  --glass-border: oklch(0.5 0.02 260 / 0.55);
+  --glass-highlight: oklch(0.98 0 0 / 0.1);
+  --surface: oklch(0.16 0.01 260 / 0.92);
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Inter", "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

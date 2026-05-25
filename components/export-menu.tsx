@@ -1,19 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import { Download, FileImage, Loader2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Slider } from "@/components/ui/slider"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export type ExportFormat = "png" | "jpeg" | "webp"
 
@@ -118,7 +110,10 @@ export function ExportMenu({ onExport, estimateSize, baseName, modKey }: ExportM
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="flex items-center gap-2 glass-panel text-foreground border-glass-border">
+        <TooltipContent
+          side="bottom"
+          className="flex items-center gap-2 glass-panel text-foreground border-glass-border"
+        >
           <span>Export image</span>
           <span className="flex items-center gap-0.5">
             <ShortcutKbd>{modKey}</ShortcutKbd>
@@ -163,9 +158,10 @@ export function ExportMenu({ onExport, estimateSize, baseName, modKey }: ExportM
                     onClick={() => setFormat(f.id)}
                     aria-pressed={active}
                     className={`flex flex-col items-center justify-center gap-0.5 p-2 rounded-lg border transition-all
-                      ${active
-                        ? "bg-primary/15 border-primary/40 text-primary shadow-sm shadow-primary/10"
-                        : "bg-secondary/30 border-glass-border text-foreground hover:bg-secondary/50 hover:border-foreground/20"
+                      ${
+                        active
+                          ? "bg-primary/15 border-primary/40 text-primary shadow-sm shadow-primary/10"
+                          : "bg-secondary/30 border-glass-border text-foreground hover:bg-secondary/50 hover:border-foreground/20"
                       }`}
                   >
                     <span className="text-xs font-semibold">{f.label}</span>
