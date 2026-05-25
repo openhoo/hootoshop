@@ -45,10 +45,6 @@ Bug reports, feature requests, and focused pull requests are welcome. See [CONTR
 
 Please do not report suspected vulnerabilities in public issues. See [SECURITY.md](SECURITY.md).
 
-## Credits
-
-Hootoshop builds on [Next.js](https://nextjs.org/), [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/), [Lucide](https://lucide.dev/), [Biome](https://biomejs.dev/), [Bun](https://bun.sh/), and [Hooversion](https://github.com/openhoo/hooversion).
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
