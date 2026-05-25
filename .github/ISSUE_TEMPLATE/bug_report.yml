@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem in Hootoshop.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest set of steps that reproduces the issue.
+      placeholder: |
+        1. Upload ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: Chrome 123, Firefox 124, Safari 17
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Add screenshots, screen recordings, or sample image details if useful.
