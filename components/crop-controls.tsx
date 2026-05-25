@@ -1,8 +1,8 @@
 "use client"
 
 import { AlignCenter, Check, RotateCcw } from "lucide-react"
-import type { CropRegion } from "@/components/crop-tool"
 import { Button } from "@/components/ui/button"
+import { type CropRegion, resolveCropDimensions } from "@/lib/crop"
 
 interface CropControlsProps {
   cropRegion: CropRegion
@@ -41,29 +41,29 @@ export function CropControls({
   aspectRatioValue,
 }: CropControlsProps) {
   const handleWidthCommit = (value: string) => {
-    const w = Math.max(20, Math.min(originalWidth, parseInt(value, 10) || 20))
-    let h: number
-    if (aspectRatioValue !== null) {
-      h = Math.round(w / aspectRatioValue)
-    } else {
-      h = Math.round(cropRegion.height)
-    }
-    h = Math.max(20, Math.min(originalHeight, h))
-    const finalW = aspectRatioValue !== null ? Math.round(h * aspectRatioValue) : w
-    onManualDimensionChange(Math.max(20, Math.min(originalWidth, finalW)), h)
+    const { width, height } = resolveCropDimensions({
+      dimension: "width",
+      value,
+      cropRegion,
+      imageWidth: originalWidth,
+      imageHeight: originalHeight,
+      aspectRatio: aspectRatioValue,
+    })
+
+    onManualDimensionChange(width, height)
   }
 
   const handleHeightCommit = (value: string) => {
-    const h = Math.max(20, Math.min(originalHeight, parseInt(value, 10) || 20))
-    let w: number
-    if (aspectRatioValue !== null) {
-      w = Math.round(h * aspectRatioValue)
-    } else {
-      w = Math.round(cropRegion.width)
-    }
-    w = Math.max(20, Math.min(originalWidth, w))
-    const finalH = aspectRatioValue !== null ? Math.round(w / aspectRatioValue) : h
-    onManualDimensionChange(w, Math.max(20, Math.min(originalHeight, finalH)))
+    const { width, height } = resolveCropDimensions({
+      dimension: "height",
+      value,
+      cropRegion,
+      imageWidth: originalWidth,
+      imageHeight: originalHeight,
+      aspectRatio: aspectRatioValue,
+    })
+
+    onManualDimensionChange(width, height)
   }
 
   return (

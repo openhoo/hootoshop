@@ -10,6 +10,7 @@ import { EditorHeader } from "@/components/editor-header"
 import type { ExportOptions } from "@/components/export-menu"
 import { ResizeTool } from "@/components/resize-tool"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { fitCropToAspectRatio, parseAspectRatio, resizeCropRegion } from "@/lib/crop"
 
 interface ImageEditorProps {
   file: File
@@ -26,23 +27,6 @@ interface EditorSnapshot {
   resizeHeight: number
   selectedAspect: string
   keepCentered: boolean
-}
-
-function parseAspectRatio(ratio: string): number | null {
-  switch (ratio) {
-    case "1:1":
-      return 1
-    case "4:3":
-      return 4 / 3
-    case "16:9":
-      return 16 / 9
-    case "3:2":
-      return 3 / 2
-    case "9:16":
-      return 9 / 16
-    default:
-      return null
-  }
 }
 
 function fileToDataURL(file: File): Promise<string> {
@@ -209,46 +193,16 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
   const handleAspectRatio = useCallback(
     (ratio: string) => {
       setSelectedAspect(ratio)
-      const targetRatio = parseAspectRatio(ratio)
-      if (targetRatio === null) return
+      const nextCrop = fitCropToAspectRatio({
+        cropRegion,
+        imageWidth: originalWidth,
+        imageHeight: originalHeight,
+        ratio,
+        keepCentered,
+      })
+      if (!nextCrop) return
 
-      const currentCenterX = cropRegion.x + cropRegion.width / 2
-      const currentCenterY = cropRegion.y + cropRegion.height / 2
-
-      let newWidth: number
-      let newHeight: number
-
-      if (targetRatio > cropRegion.width / cropRegion.height) {
-        newWidth = cropRegion.width
-        newHeight = newWidth / targetRatio
-      } else {
-        newHeight = cropRegion.height
-        newWidth = newHeight * targetRatio
-      }
-
-      newWidth = Math.min(newWidth, originalWidth)
-      newHeight = Math.min(newHeight, originalHeight)
-
-      if (newWidth / newHeight > targetRatio) {
-        newWidth = newHeight * targetRatio
-      } else {
-        newHeight = newWidth / targetRatio
-      }
-
-      let newX: number
-      let newY: number
-
-      if (keepCentered) {
-        newX = (originalWidth - newWidth) / 2
-        newY = (originalHeight - newHeight) / 2
-      } else {
-        newX = currentCenterX - newWidth / 2
-        newY = currentCenterY - newHeight / 2
-        newX = Math.max(0, Math.min(newX, originalWidth - newWidth))
-        newY = Math.max(0, Math.min(newY, originalHeight - newHeight))
-      }
-
-      setCropRegion({ x: newX, y: newY, width: newWidth, height: newHeight })
+      setCropRegion(nextCrop)
       setHasChanges(true)
     },
     [cropRegion, originalWidth, originalHeight, keepCentered]
@@ -272,24 +226,16 @@ export function ImageEditor({ file, onClose }: ImageEditorProps) {
 
   const handleManualDimensionChange = useCallback(
     (width: number, height: number) => {
-      let newCrop: CropRegion
-      if (keepCentered) {
-        newCrop = {
-          x: (originalWidth - width) / 2,
-          y: (originalHeight - height) / 2,
+      setCropRegion(
+        resizeCropRegion({
+          cropRegion,
+          imageWidth: originalWidth,
+          imageHeight: originalHeight,
           width,
           height,
-        }
-      } else {
-        const cx = cropRegion.x + cropRegion.width / 2
-        const cy = cropRegion.y + cropRegion.height / 2
-        let x = cx - width / 2
-        let y = cy - height / 2
-        x = Math.max(0, Math.min(x, originalWidth - width))
-        y = Math.max(0, Math.min(y, originalHeight - height))
-        newCrop = { x, y, width, height }
-      }
-      setCropRegion(newCrop)
+          keepCentered,
+        })
+      )
       setHasChanges(true)
     },
     [cropRegion, originalWidth, originalHeight, keepCentered]

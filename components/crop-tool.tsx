@@ -1,13 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { type CropRegion, centerCrop, clampCrop, getSnapGuides, snapMove } from "@/lib/crop"
 
-export interface CropRegion {
-  x: number
-  y: number
-  width: number
-  height: number
-}
+export type { CropRegion } from "@/lib/crop"
 
 interface CropToolProps {
   imageSrc: string
@@ -24,35 +20,6 @@ type HandlePosition = "nw" | "ne" | "sw" | "se" | "n" | "s" | "e" | "w"
 const SNAP_THRESHOLD = 6
 const ARROW_STEP = 1
 const ARROW_STEP_SHIFT = 10
-
-function clampCrop(crop: CropRegion, imgW: number, imgH: number): CropRegion {
-  const w = Math.max(20, Math.min(crop.width, imgW))
-  const h = Math.max(20, Math.min(crop.height, imgH))
-  const x = Math.max(0, Math.min(crop.x, imgW - w))
-  const y = Math.max(0, Math.min(crop.y, imgH - h))
-  return { x, y, width: w, height: h }
-}
-
-function centerCrop(width: number, height: number, imgW: number, imgH: number): CropRegion {
-  return { x: (imgW - width) / 2, y: (imgH - height) / 2, width, height }
-}
-
-function getSnapGuides(crop: CropRegion, imgW: number, imgH: number, threshold: number) {
-  const cropCX = crop.x + crop.width / 2
-  const cropCY = crop.y + crop.height / 2
-  return {
-    vertical: Math.abs(cropCX - imgW / 2) < threshold,
-    horizontal: Math.abs(cropCY - imgH / 2) < threshold,
-  }
-}
-
-function snapMove(crop: CropRegion, imgW: number, imgH: number, threshold: number): CropRegion {
-  const result = { ...crop }
-  if (Math.abs(crop.x + crop.width / 2 - imgW / 2) < threshold) result.x = imgW / 2 - crop.width / 2
-  if (Math.abs(crop.y + crop.height / 2 - imgH / 2) < threshold)
-    result.y = imgH / 2 - crop.height / 2
-  return result
-}
 
 export function CropTool({
   imageSrc,

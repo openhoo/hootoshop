@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Slider } from "@/components/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatBytes } from "@/lib/image-sizing"
 
 export type ExportFormat = "png" | "jpeg" | "webp"
 
@@ -36,12 +37,6 @@ const FORMATS: FormatInfo[] = [
   { id: "jpeg", label: "JPEG", ext: "jpg", description: "Compressed, no alpha", lossless: false },
   { id: "webp", label: "WebP", ext: "webp", description: "Modern, efficient", lossless: false },
 ]
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
-}
 
 function ShortcutKbd({ children }: { children: React.ReactNode }) {
   return (

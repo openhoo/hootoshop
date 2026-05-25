@@ -4,7 +4,6 @@
 
 ## Validation
 
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm build`
+- [ ] `bun run check`
+- [ ] `bun run audit`
 - [ ] Manual smoke test, if UI behavior changed

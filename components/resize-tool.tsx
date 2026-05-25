@@ -4,6 +4,13 @@ import { Check, Lock, Maximize2, Target, Unlock } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
+import {
+  dimensionsForScale,
+  dimensionsForTargetBytes,
+  estimateResizedBytes,
+  formatBytes,
+  getDataUrlByteSize,
+} from "@/lib/image-sizing"
 
 interface ResizeToolProps {
   imageSrc: string
@@ -24,26 +31,6 @@ const PRESETS = [
   { label: "640 x 480", w: 640, h: 480 },
 ]
 
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
-}
-
-function estimateFileSize(
-  origBytes: number,
-  origW: number,
-  origH: number,
-  newW: number,
-  newH: number
-): number {
-  // Rough pixel-area ratio estimation
-  const origPixels = origW * origH
-  const newPixels = newW * newH
-  if (origPixels === 0) return 0
-  return Math.round(origBytes * (newPixels / origPixels))
-}
-
 export function ResizeTool({
   imageSrc,
   originalWidth,
@@ -58,10 +45,7 @@ export function ResizeTool({
 
   // Track actual file size of the current source
   const dataUrlBytes = useMemo(() => {
-    if (!imageSrc.startsWith("data:")) return null
-
-    const base64Part = imageSrc.split(",")[1]
-    return base64Part ? Math.round((base64Part.length * 3) / 4) : 0
+    return getDataUrlByteSize(imageSrc)
   }, [imageSrc])
   const [fetchedSourceBytes, setFetchedSourceBytes] = useState(0)
   const sourceBytes = dataUrlBytes ?? fetchedSourceBytes
@@ -88,7 +72,7 @@ export function ResizeTool({
     }
   }, [imageSrc, dataUrlBytes])
 
-  const estimatedBytes = estimateFileSize(
+  const estimatedBytes = estimateResizedBytes(
     sourceBytes,
     originalWidth,
     originalHeight,
@@ -124,8 +108,8 @@ export function ResizeTool({
 
   const handleScaleChange = useCallback(
     (values: number[]) => {
-      const scale = values[0] / 100
-      onResize(Math.round(originalWidth * scale), Math.round(originalHeight * scale))
+      const { width, height } = dimensionsForScale(originalWidth, originalHeight, values[0])
+      onResize(width, height)
     },
     [originalWidth, originalHeight, onResize]
   )
@@ -143,12 +127,15 @@ export function ResizeTool({
     const targetBytes = (parseFloat(targetSizeKB) || 0) * 1024
     if (targetBytes <= 0 || sourceBytes <= 0) return
 
-    // Simple: compute the ratio needed and derive scale
-    const ratio = targetBytes / sourceBytes
-    const scale = Math.sqrt(ratio) // pixels area scales quadratically
-    const newW = Math.max(1, Math.round(originalWidth * scale))
-    const newH = Math.max(1, Math.round(originalHeight * scale))
-    onResize(newW, newH)
+    const dimensions = dimensionsForTargetBytes(
+      sourceBytes,
+      originalWidth,
+      originalHeight,
+      targetBytes
+    )
+    if (!dimensions) return
+
+    onResize(dimensions.width, dimensions.height)
   }, [targetSizeKB, sourceBytes, originalWidth, originalHeight, onResize])
 
   const scalePercent = Math.round((resizeWidth / originalWidth) * 100)
