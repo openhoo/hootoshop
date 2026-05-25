@@ -1,4 +1,16 @@
 #!/bin/sh
 set -eu
 
-bunx --no-install biome check --staged --error-on-warnings
+if output="$(bunx --no-install biome check --staged --error-on-warnings 2>&1)"; then
+  printf '%s\n' "$output"
+  exit 0
+fi
+
+status=$?
+if printf '%s\n' "$output" | grep -q "No files were processed"; then
+  printf '%s\n' "$output"
+  exit 0
+fi
+
+printf '%s\n' "$output"
+exit "$status"
